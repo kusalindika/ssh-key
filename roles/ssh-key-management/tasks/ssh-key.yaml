@@ -1,0 +1,25 @@
+---
+  - name: Create User
+    user:
+      name: "{{ item }}"
+      shell: /bin/bash
+    with_items:
+      - test
+
+  - name: Set Authorized Keys For Users
+    authorized_key:
+      user: "{{ item }}"
+      state: present
+      key: "{{lookup('file', 'files/{{ item }}/id_rsa.pub')}}"
+    with_items:
+      - test
+
+  - name: Grant root Priviledges
+    template:
+      src: templates/sudoers.j2
+      dest: /etc/sudoers.d/{{item}}
+      mode: '0600'
+      owner: root
+      validate: /usr/sbin/visudo -cf %s
+    with_items:
+      - test
